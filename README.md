@@ -44,7 +44,13 @@ Controller  →  Service  →  Repository  →  H2 (file-based)
 ### Prerequisites
 - JDK 21 (the project also compiles under newer JDKs, but Lombok's annotation
   processor was observed to fail under a very new/EA `javac`; JDK 21 LTS is the
-  tested, recommended toolchain)
+  tested, recommended toolchain). On macOS with Homebrew:
+  ```bash
+  brew install openjdk@21
+  export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
+  ```
+  Add the `export` line to your shell profile (`~/.zshrc`) so `mvn`/`./mvnw` pick
+  up JDK 21 in every new terminal, or prefix each command with it as shown below.
 - Maven is not required to be pre-installed — use the bundled wrapper (`./mvnw`)
 
 ### Clone and build
