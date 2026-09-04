@@ -1,0 +1,55 @@
+package com.syfe.financemanager.controller;
+
+import com.syfe.financemanager.dto.request.TransactionRequest;
+import com.syfe.financemanager.dto.request.TransactionUpdateRequest;
+import com.syfe.financemanager.dto.response.MessageResponse;
+import com.syfe.financemanager.dto.response.TransactionListResponse;
+import com.syfe.financemanager.dto.response.TransactionResponse;
+import com.syfe.financemanager.entity.TransactionType;
+import com.syfe.financemanager.security.SecurityUtils;
+import com.syfe.financemanager.service.TransactionService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+
+/** CRUD for the authenticated user's income/expense transactions. */
+@RestController
+@RequestMapping("/api/transactions")
+@RequiredArgsConstructor
+public class TransactionController {
+
+    private final TransactionService transactionService;
+
+    @PostMapping
+    public ResponseEntity<TransactionResponse> create(@Valid @RequestBody TransactionRequest request) {
+        TransactionResponse response = transactionService.create(SecurityUtils.getCurrentUserId(), request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<TransactionListResponse> getTransactions(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) TransactionType type) {
+        TransactionListResponse response = transactionService.getTransactions(
+                SecurityUtils.getCurrentUserId(), startDate, endDate, categoryId, type);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TransactionResponse> update(@PathVariable Long id,
+                                                        @Valid @RequestBody TransactionUpdateRequest request) {
+        return ResponseEntity.ok(transactionService.update(SecurityUtils.getCurrentUserId(), id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<MessageResponse> delete(@PathVariable Long id) {
+        return ResponseEntity.ok(transactionService.delete(SecurityUtils.getCurrentUserId(), id));
+    }
+}
