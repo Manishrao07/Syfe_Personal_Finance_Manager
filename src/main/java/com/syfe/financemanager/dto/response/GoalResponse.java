@@ -18,6 +18,6 @@ public class GoalResponse {
     private final LocalDate targetDate;
     private final LocalDate startDate;
     private final BigDecimal currentProgress;
-    private final BigDecimal progressPercentage;
+    private final double progressPercentage;
     private final BigDecimal remainingAmount;
 }

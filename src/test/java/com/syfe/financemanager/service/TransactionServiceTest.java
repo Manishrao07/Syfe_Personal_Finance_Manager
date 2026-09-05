@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -147,6 +148,29 @@ class TransactionServiceTest {
 
         assertThat(existing.isDeleted()).isTrue();
         verify(transactionRepository).save(existing);
+    }
+
+    @Test
+    void getTransactions_filtersByCategoryIdWhenProvided() {
+        Transaction existing = Transaction.builder()
+                .id(5L).user(User.builder().id(USER_ID).build()).category(salaryCategory())
+                .amount(BigDecimal.TEN).date(LocalDate.now()).type(TransactionType.INCOME).deleted(false).build();
+        when(transactionRepository.search(USER_ID, null, null, 1L, null)).thenReturn(List.of(existing));
+
+        var response = transactionService.getTransactions(USER_ID, null, null, 1L, null, null);
+
+        assertThat(response.getTransactions()).hasSize(1);
+        verifyNoInteractions(categoryService);
+    }
+
+    @Test
+    void getTransactions_resolvesCategoryNameToIdWhenCategoryIdMissing() {
+        when(categoryService.resolveVisibleCategory(USER_ID, "Salary")).thenReturn(salaryCategory());
+        when(transactionRepository.search(USER_ID, null, null, 1L, null)).thenReturn(List.of());
+
+        transactionService.getTransactions(USER_ID, null, null, null, "Salary", null);
+
+        verify(transactionRepository).search(USER_ID, null, null, 1L, null);
     }
 
     @Test

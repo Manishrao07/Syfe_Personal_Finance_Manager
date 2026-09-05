@@ -54,10 +54,15 @@ public class TransactionService {
         return toResponse(transactionRepository.save(transaction));
     }
 
+    @Transactional(readOnly = true)
     public TransactionListResponse getTransactions(Long userId, LocalDate startDate, LocalDate endDate,
-                                                     Long categoryId, TransactionType type) {
+                                                     Long categoryId, String categoryName, TransactionType type) {
+        Long effectiveCategoryId = categoryId != null
+                ? categoryId
+                : categoryName != null ? categoryService.resolveVisibleCategory(userId, categoryName).getId() : null;
+
         List<TransactionResponse> transactions = transactionRepository
-                .search(userId, startDate, endDate, categoryId, type).stream()
+                .search(userId, startDate, endDate, effectiveCategoryId, type).stream()
                 .map(this::toResponse)
                 .toList();
         return new TransactionListResponse(transactions);

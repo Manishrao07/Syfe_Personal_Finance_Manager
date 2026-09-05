@@ -75,6 +75,6 @@ public class ReportService {
     private BigDecimal netSavings(Map<String, BigDecimal> income, Map<String, BigDecimal> expenses) {
         BigDecimal totalIncome = income.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal totalExpenses = expenses.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
-        return totalIncome.subtract(totalExpenses).setScale(2, RoundingMode.HALF_UP);
+        return totalIncome.subtract(totalExpenses);
     }
 }

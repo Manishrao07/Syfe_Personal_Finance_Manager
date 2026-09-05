@@ -36,9 +36,10 @@ public class TransactionController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String category,
             @RequestParam(required = false) TransactionType type) {
         TransactionListResponse response = transactionService.getTransactions(
-                SecurityUtils.getCurrentUserId(), startDate, endDate, categoryId, type);
+                SecurityUtils.getCurrentUserId(), startDate, endDate, categoryId, category, type);
         return ResponseEntity.ok(response);
     }
 

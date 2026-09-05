@@ -74,7 +74,7 @@ class GoalServiceTest {
         GoalResponse response = goalService.create(USER_ID, request);
 
         assertThat(response.getCurrentProgress()).isEqualByComparingTo("1000.00");
-        assertThat(response.getProgressPercentage()).isEqualByComparingTo("20.00");
+        assertThat(response.getProgressPercentage()).isEqualTo(20.0);
         assertThat(response.getRemainingAmount()).isEqualByComparingTo("4000.00");
         assertThat(response.getStartDate()).isEqualTo(LocalDate.now());
     }
@@ -127,7 +127,7 @@ class GoalServiceTest {
 
         assertThat(response.getTargetAmount()).isEqualByComparingTo("6000.00");
         assertThat(response.getCurrentProgress()).isEqualByComparingTo("1000.00");
-        assertThat(response.getProgressPercentage()).isEqualByComparingTo("16.67");
+        assertThat(response.getProgressPercentage()).isEqualTo(16.67);
     }
 
     @Test

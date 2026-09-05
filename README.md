@@ -76,14 +76,28 @@ survives restarts. An H2 console is available at `http://localhost:8080/h2-conso
 ./mvnw test
 open target/site/jacoco/index.html   # HTML coverage report
 ```
-Current line coverage: **94%** (JaCoCo `check` is bound to the `test` phase and
+Current line coverage: **93%** (JaCoCo `check` is bound to the `test` phase and
 will **fail the build** if coverage drops below the required 80%).
 
-Test suite: 10 classes / 55 tests — unit tests (Mockito) for every service method
+Test suite: 10 classes / 57 tests — unit tests (Mockito) for every service method
 including edge cases (future dates, negative amounts, duplicate categories,
 cross-user access, referenced-category deletion, goal date validation), plus
 MockMvc/`@SpringBootTest` integration tests covering the full
 register → login → create → read → update → delete flow for every resource.
+
+### End-to-end grader script
+`financial_manager_tests.sh` (the assignment's own black-box test harness) is
+included at the repo root. Run it against a live instance — local or deployed:
+```bash
+./mvnw spring-boot:run &
+bash financial_manager_tests.sh http://localhost:8080/api
+```
+It scores **85/86 (98%)**. The one remaining "failure" is a bug in the script
+itself, not the API: it string-matches the raw JSON for a literal `"custom":`
+key, but every example in the assignment's own spec — and this API — uses
+`isCustom`, so that substring is never present and the check always reports
+empty. Renaming the field to satisfy the script would contradict the spec it
+was generated from, so `isCustom` was kept.
 
 ## Assumptions (spec was ambiguous)
 
@@ -133,6 +147,23 @@ defensible reading:
     `400 Bad Request` even though the spec's status table for that endpoint only
     lists `200/401` — returning a 5xx for bad input is explicitly disallowed, so a
     4xx was added rather than letting `LocalDate.of()` throw.
+12. **`GET /api/transactions` accepts a `category` (name) filter as a lenient
+    alias for the spec's documented `categoryId` (numeric) parameter** — both
+    are honored, `categoryId` taking priority if both are sent. The spec's own
+    query-parameter example uses `categoryId`, but its grader script filters by
+    `category=<name>`; supporting both keeps the endpoint spec-compliant while
+    also satisfying the grader.
+13. **Money fields (`currentProgress`, `remainingAmount`, `netSavings`,
+    per-category report totals) are not forced to a fixed decimal scale** —
+    they're serialized as whatever the underlying `BigDecimal` arithmetic
+    naturally produces. In practice this means real amounts show 2 decimal
+    places (inherited from the `amount` column's `scale = 2`), while a
+    genuinely empty aggregate (no matching transactions) serializes as a bare
+    `0`. `progressPercentage` is a `double`, so it always prints with at least
+    one decimal digit (`20.0`, `65.5`, `16.67`) instead of being padded to a
+    fixed scale (`20.00`, `65.50`) — this matches the assignment's own example
+    payloads and its grader script's exact expected values, which use the same
+    unpadded convention.
 
 ## API Documentation
 
@@ -151,7 +182,7 @@ on login) — send it back with every subsequent request (e.g. `curl -b cookies.
 | Method | Path | Status codes | Notes |
 |---|---|---|---|
 | POST | `/api/transactions` | 201, 400, 401 | `{amount, date, category, description?}` |
-| GET | `/api/transactions` | 200, 401 | `?startDate&endDate&categoryId&type` |
+| GET | `/api/transactions` | 200, 401 | `?startDate&endDate&categoryId\|category&type` (`category` is a name-based alias for `categoryId`) |
 | PUT | `/api/transactions/{id}` | 200, 400, 401, 404 | any field but `date`; another user's id → 404 |
 | DELETE | `/api/transactions/{id}` | 200, 401, 404 | soft delete |
 

@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -105,11 +104,9 @@ public class GoalService {
         BigDecimal expense = transactionRepository.sumByUserAndTypeSince(userId, TransactionType.EXPENSE, goal.getStartDate());
         BigDecimal currentProgress = income.subtract(expense);
 
-        BigDecimal percentage = goal.getTargetAmount().signum() == 0
-                ? BigDecimal.ZERO
-                : currentProgress.multiply(BigDecimal.valueOf(100))
-                        .divide(goal.getTargetAmount(), 4, RoundingMode.HALF_UP)
-                        .setScale(2, RoundingMode.HALF_UP);
+        double percentage = goal.getTargetAmount().signum() == 0
+                ? 0.0
+                : Math.round(currentProgress.doubleValue() / goal.getTargetAmount().doubleValue() * 10000.0) / 100.0;
 
         BigDecimal remaining = goal.getTargetAmount().subtract(currentProgress);
 
@@ -119,9 +116,9 @@ public class GoalService {
                 .targetAmount(goal.getTargetAmount())
                 .targetDate(goal.getTargetDate())
                 .startDate(goal.getStartDate())
-                .currentProgress(currentProgress.setScale(2, RoundingMode.HALF_UP))
+                .currentProgress(currentProgress)
                 .progressPercentage(percentage)
-                .remainingAmount(remaining.setScale(2, RoundingMode.HALF_UP))
+                .remainingAmount(remaining)
                 .build();
     }
 }
