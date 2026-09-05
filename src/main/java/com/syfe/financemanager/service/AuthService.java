@@ -18,6 +18,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    /** Hashes the password and persists a new user; throws {@link ConflictException} if the username is taken. */
     @Transactional
     public RegisterResponse register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {

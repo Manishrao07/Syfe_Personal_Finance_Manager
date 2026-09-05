@@ -20,17 +20,20 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
+    /** Returns the global default categories plus the caller's own custom categories. */
     @GetMapping
     public ResponseEntity<CategoryListResponse> getCategories() {
         return ResponseEntity.ok(categoryService.getVisibleCategories(SecurityUtils.getCurrentUserId()));
     }
 
+    /** Creates a custom category owned by the caller. */
     @PostMapping
     public ResponseEntity<CategoryResponse> createCategory(@Valid @RequestBody CategoryRequest request) {
         CategoryResponse response = categoryService.createCustomCategory(SecurityUtils.getCurrentUserId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /** Deletes one of the caller's own custom categories, by name. */
     @DeleteMapping("/{name}")
     public ResponseEntity<MessageResponse> deleteCategory(@PathVariable String name) {
         return ResponseEntity.ok(categoryService.deleteCategory(SecurityUtils.getCurrentUserId(), name));

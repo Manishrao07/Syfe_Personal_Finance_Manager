@@ -35,6 +35,7 @@ public class GoalService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
 
+    /** Creates a savings goal for the given user; {@code startDate} defaults to today when omitted. */
     @Transactional
     public GoalResponse create(Long userId, GoalRequest request) {
         if (!request.getTargetDate().isAfter(LocalDate.now())) {
@@ -42,6 +43,9 @@ public class GoalService {
         }
 
         LocalDate startDate = request.getStartDate() != null ? request.getStartDate() : LocalDate.now();
+        if (!startDate.isBefore(request.getTargetDate())) {
+            throw new BadRequestException("startDate must be before targetDate");
+        }
 
         SavingsGoal goal = SavingsGoal.builder()
                 .user(userRepository.getReferenceById(userId))
@@ -54,6 +58,7 @@ public class GoalService {
         return toResponse(savingsGoalRepository.save(goal));
     }
 
+    /** Lists the given user's savings goals, each with progress recomputed fresh. */
     public GoalListResponse getAll(Long userId) {
         List<GoalResponse> goals = savingsGoalRepository.findByUserId(userId).stream()
                 .map(this::toResponse)
@@ -61,10 +66,12 @@ public class GoalService {
         return new GoalListResponse(goals);
     }
 
+    /** Returns one of the given user's own goals; another user's goal throws {@link ForbiddenException}. */
     public GoalResponse getOne(Long userId, Long id) {
         return toResponse(findOwned(userId, id));
     }
 
+    /** Updates the target amount and/or target date of one of the given user's own goals. */
     @Transactional
     public GoalResponse update(Long userId, Long id, GoalUpdateRequest request) {
         SavingsGoal goal = findOwned(userId, id);
@@ -72,6 +79,9 @@ public class GoalService {
         if (request.getTargetDate() != null) {
             if (!request.getTargetDate().isAfter(LocalDate.now())) {
                 throw new BadRequestException("targetDate must be strictly in the future");
+            }
+            if (!goal.getStartDate().isBefore(request.getTargetDate())) {
+                throw new BadRequestException("targetDate must be after the goal's startDate");
             }
             goal.setTargetDate(request.getTargetDate());
         }
@@ -82,6 +92,7 @@ public class GoalService {
         return toResponse(savingsGoalRepository.save(goal));
     }
 
+    /** Deletes one of the given user's own goals. */
     @Transactional
     public MessageResponse delete(Long userId, Long id) {
         SavingsGoal goal = findOwned(userId, id);

@@ -32,6 +32,7 @@ public class CategoryService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
 
+    /** Returns the global default categories plus the given user's own custom categories. */
     public CategoryListResponse getVisibleCategories(Long userId) {
         List<CategoryResponse> categories = categoryRepository.findByOwnerIsNullOrOwnerId(userId).stream()
                 .map(this::toResponse)
@@ -39,6 +40,7 @@ public class CategoryService {
         return new CategoryListResponse(categories);
     }
 
+    /** Creates a custom category owned by the given user; throws {@link ConflictException} on a per-user duplicate name. */
     @Transactional
     public CategoryResponse createCustomCategory(Long userId, CategoryRequest request) {
         if (categoryRepository.existsByNameAndOwnerId(request.getName(), userId)) {
@@ -55,6 +57,11 @@ public class CategoryService {
         return toResponse(categoryRepository.save(category));
     }
 
+    /**
+     * Deletes a custom category by name. Returns 400 for a default category, 403 for
+     * another user's custom category, 409 if it's still referenced by a transaction,
+     * and 404 if no such category exists at all.
+     */
     @Transactional
     public MessageResponse deleteCategory(Long userId, String name) {
         Optional<Category> ownCategory = categoryRepository.findByNameAndOwnerId(name, userId);

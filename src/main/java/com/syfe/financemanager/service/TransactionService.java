@@ -33,6 +33,7 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final CategoryService categoryService;
 
+    /** Creates a transaction; its type is derived from the referenced category, and its date cannot be in the future. */
     @Transactional
     public TransactionResponse create(Long userId, TransactionRequest request) {
         if (request.getDate().isAfter(LocalDate.now())) {
@@ -54,6 +55,12 @@ public class TransactionService {
         return toResponse(transactionRepository.save(transaction));
     }
 
+    /**
+     * Lists the given user's non-deleted transactions, newest first, optionally filtered by
+     * date range, category (by id or name — {@code categoryId} takes priority if both are
+     * given), and type. Read-only and transactional so the category name is safe to read
+     * off each result even when {@code open-in-view} is disabled (see README).
+     */
     @Transactional(readOnly = true)
     public TransactionListResponse getTransactions(Long userId, LocalDate startDate, LocalDate endDate,
                                                      Long categoryId, String categoryName, TransactionType type) {
@@ -68,6 +75,7 @@ public class TransactionService {
         return new TransactionListResponse(transactions);
     }
 
+    /** Updates any editable field of one of the given user's own transactions; {@code date} is not editable. */
     @Transactional
     public TransactionResponse update(Long userId, Long id, TransactionUpdateRequest request) {
         Transaction transaction = findOwned(userId, id);
@@ -87,6 +95,7 @@ public class TransactionService {
         return toResponse(transactionRepository.save(transaction));
     }
 
+    /** Soft-deletes one of the given user's own transactions; it is excluded from listings, goals, and reports thereafter. */
     @Transactional
     public MessageResponse delete(Long userId, Long id) {
         Transaction transaction = findOwned(userId, id);

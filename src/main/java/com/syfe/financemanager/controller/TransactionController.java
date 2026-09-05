@@ -25,12 +25,14 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
+    /** Creates an income or expense transaction; its type is derived from the referenced category. */
     @PostMapping
     public ResponseEntity<TransactionResponse> create(@Valid @RequestBody TransactionRequest request) {
         TransactionResponse response = transactionService.create(SecurityUtils.getCurrentUserId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /** Lists the caller's non-deleted transactions, newest first, optionally filtered. */
     @GetMapping
     public ResponseEntity<TransactionListResponse> getTransactions(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -43,12 +45,14 @@ public class TransactionController {
         return ResponseEntity.ok(response);
     }
 
+    /** Updates any editable field of one of the caller's own transactions; {@code date} cannot be changed. */
     @PutMapping("/{id}")
     public ResponseEntity<TransactionResponse> update(@PathVariable Long id,
                                                         @Valid @RequestBody TransactionUpdateRequest request) {
         return ResponseEntity.ok(transactionService.update(SecurityUtils.getCurrentUserId(), id, request));
     }
 
+    /** Soft-deletes one of the caller's own transactions; it is excluded from listings, goals, and reports thereafter. */
     @DeleteMapping("/{id}")
     public ResponseEntity<MessageResponse> delete(@PathVariable Long id) {
         return ResponseEntity.ok(transactionService.delete(SecurityUtils.getCurrentUserId(), id));

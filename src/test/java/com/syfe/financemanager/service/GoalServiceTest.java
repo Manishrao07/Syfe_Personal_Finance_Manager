@@ -93,6 +93,20 @@ class GoalServiceTest {
     }
 
     @Test
+    void create_throwsBadRequest_whenStartDateIsNotBeforeTargetDate() {
+        GoalRequest request = new GoalRequest();
+        request.setGoalName("Invalid Dates Goal");
+        request.setTargetAmount(BigDecimal.TEN);
+        request.setTargetDate(LocalDate.now().plusYears(1));
+        request.setStartDate(LocalDate.now().plusYears(2));
+
+        assertThatThrownBy(() -> goalService.create(USER_ID, request))
+                .isInstanceOf(BadRequestException.class);
+
+        verifyNoInteractions(savingsGoalRepository);
+    }
+
+    @Test
     void getOne_throwsNotFound_whenGoalMissing() {
         when(savingsGoalRepository.findById(1L)).thenReturn(Optional.empty());
 

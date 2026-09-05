@@ -30,11 +30,13 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final SecurityContextRepository securityContextRepository;
 
+    /** Creates a new user account with a BCrypt-hashed password. */
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
     }
 
+    /** Authenticates the user and establishes a session, returned to the client as a cookie. */
     @PostMapping("/login")
     public ResponseEntity<MessageResponse> login(@Valid @RequestBody LoginRequest request,
                                                   HttpServletRequest httpRequest,
@@ -50,6 +52,7 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("Login successful"));
     }
 
+    /** Invalidates the current session and clears the security context. */
     @PostMapping("/logout")
     public ResponseEntity<MessageResponse> logout(HttpServletRequest request, HttpServletResponse response) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

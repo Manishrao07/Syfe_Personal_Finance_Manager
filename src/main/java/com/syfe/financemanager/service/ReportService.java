@@ -27,6 +27,7 @@ public class ReportService {
 
     private final TransactionRepository transactionRepository;
 
+    /** Income/expense totals by category and net savings for the given user, for one month. */
     public MonthlyReportResponse getMonthlyReport(Long userId, int year, int month) {
         if (month < 1 || month > 12) {
             throw new BadRequestException("month must be between 1 and 12");
@@ -46,6 +47,7 @@ public class ReportService {
                 .build();
     }
 
+    /** Income/expense totals by category and net savings for the given user, aggregated over a year. */
     public YearlyReportResponse getYearlyReport(Long userId, int year) {
         LocalDate startDate = Year.of(year).atDay(1);
         LocalDate endDate = Year.of(year).atMonth(12).atEndOfMonth();
