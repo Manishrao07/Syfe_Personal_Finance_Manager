@@ -15,6 +15,14 @@ repo for convenience.
 - Tailwind CSS v4
 - Recharts (dashboard bar chart, expense breakdown donut chart)
 - Session-cookie auth against the Spring Boot backend (`credentials: "include"` on every request — no tokens stored client-side)
+- All `/api/*` calls are proxied server-side to the backend via a rewrite in
+  `next.config.ts`, so the browser only ever talks to this app's own origin.
+  This is deliberate: a direct browser-to-backend call would make the session
+  cookie a genuine cross-site (third-party) cookie between the Vercel and
+  Render domains, which some browsers/privacy settings block outright even
+  with `SameSite=None; Secure` set correctly — silently breaking every
+  authenticated request after a seemingly successful login. Proxying makes it
+  a normal first-party cookie instead, avoiding the problem entirely.
 
 ## Local development
 
@@ -23,13 +31,15 @@ npm install
 npm run dev
 ```
 
-Set the backend URL in `.env.local` (see `.env.example`):
+Set the backend URL in `.env.local` (see `.env.example`) — this is a plain
+server-side variable (no `NEXT_PUBLIC_` prefix) since it's only read by the
+rewrite in `next.config.ts`, never sent to the browser:
 
 ```
-NEXT_PUBLIC_API_BASE_URL=https://syfe-personal-finance-manager-1uct.onrender.com/api
+BACKEND_API_URL=https://syfe-personal-finance-manager-1uct.onrender.com/api
 ```
 
-To point at a local backend instead, set it to `http://localhost:8080/api` — the backend's `local` profile already allows CORS from `http://localhost:3000` by default.
+To point at a local backend instead, set it to `http://localhost:8080/api`.
 
 ## Deploying to Vercel
 
@@ -37,12 +47,17 @@ To point at a local backend instead, set it to `http://localhost:8080/api` — t
 2. Under **Root Directory**, select `frontend` (this repo also contains the
    unrelated Java backend at its root, so Vercel needs to know to build only
    this subfolder) — it then auto-detects Next.js, no further config needed.
-3. Add an environment variable: `NEXT_PUBLIC_API_BASE_URL` = your deployed backend's `/api` base URL. (`NEXT_PUBLIC_*` vars are inlined at build time, so this must be set in Vercel's project settings, not just `.env.local`.)
+3. Add an environment variable: `BACKEND_API_URL` = your deployed backend's `/api` base URL. Use the **Config** type, not **Secret** — it needs to be readable by the rewrite at request time.
 4. Deploy.
 
 ### Backend CORS
 
-The backend's `render` profile allows any `https://*.vercel.app` origin by default (see `app.cors.allowed-origin-patterns` in the backend's `application.yml`), so a fresh Vercel deployment should work without any backend changes. To restrict it to your exact production domain instead, set the `CORS_ALLOWED_ORIGINS` environment variable on the backend's Render service (comma-separated if you need more than one origin).
+Because the browser only ever calls this app's own origin, the backend's CORS
+configuration doesn't come into play for this deployment path at all (CORS is
+a browser concept — the Vercel-to-Render leg of the proxy is a server-to-server
+call). The backend's `app.cors.allowed-origin-patterns` setting exists for
+completeness / anyone hitting the API directly from a browser, but isn't
+required for this frontend to work.
 
 ## Notes
 

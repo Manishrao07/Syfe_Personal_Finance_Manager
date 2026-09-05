@@ -10,7 +10,10 @@ import type {
   YearlyReport,
 } from "./types";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api";
+// Always same-origin: next.config.ts rewrites /api/* to the real backend
+// server-side, so the browser never makes a cross-site request and the
+// session cookie stays a normal first-party cookie.
+const BASE_URL = "/api";
 
 export class ApiError extends Error {
   status: number;
