@@ -4,6 +4,8 @@ A Spring Boot 3 REST API for tracking income/expense transactions, categorizing
 them, setting savings goals, and generating monthly/yearly reports. Built for the
 Personal Finance Manager assignment.
 
+‼️Demo - https://syfe-personal-finance-manager-1uct.onrender.com
+
 ## Tech Stack
 
 | Component      | Choice                                             |
