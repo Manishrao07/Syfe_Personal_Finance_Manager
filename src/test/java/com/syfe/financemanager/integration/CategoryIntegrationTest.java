@@ -39,7 +39,8 @@ class CategoryIntegrationTest extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.isCustom").value(true));
+                .andExpect(jsonPath("$.isCustom").value(true))
+                .andExpect(jsonPath("$.custom").value(true));
 
         mockMvc.perform(post("/api/categories")
                         .session(session)
