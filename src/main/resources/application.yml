@@ -43,6 +43,14 @@ server:
     session:
       cookie:
         secure: true
+        # A browser frontend on a different site (e.g. Vercel) needs SameSite=None
+        # (only honored by browsers when Secure is also set, which it is above) to
+        # send this cookie on cross-site fetch/XHR requests.
+        same-site: none
+
+app:
+  cors:
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGINS:https://*.vercel.app}
 
 spring:
   config:
