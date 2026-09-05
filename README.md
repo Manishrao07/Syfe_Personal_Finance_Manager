@@ -6,6 +6,9 @@ Personal Finance Manager assignment.
 
 ‼️Link - https://syfe-personal-finance-manager-1uct.onrender.com
 
+A [Next.js frontend](frontend/) for this API lives in the `frontend/` folder of
+this same repo (see its own README for setup and deployment).
+
 ## Tech Stack
 
 | Component      | Choice                                             |
