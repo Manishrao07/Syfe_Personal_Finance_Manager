@@ -4,7 +4,8 @@ A Spring Boot 3 REST API for tracking income/expense transactions, categorizing
 them, setting savings goals, and generating monthly/yearly reports. Built for the
 Personal Finance Manager assignment.
 
-‼️Link - https://syfe-personal-finance-manager-1uct.onrender.com
+‼️Link -frontend-pink-six-96.vercel.app
+https://syfe-personal-finance-manager-1uct.onrender.com
 
 A [Next.js frontend](frontend/) for this API lives in the `frontend/` folder of
 this same repo (see its own README for setup and deployment).
