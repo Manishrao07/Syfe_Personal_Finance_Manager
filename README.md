@@ -5,6 +5,7 @@ them, setting savings goals, and generating monthly/yearly reports. Built for th
 Personal Finance Manager assignment.
 
 ‼️Link -https://frontend-pink-six-96.vercel.app/login
+
 https://syfe-personal-finance-manager-1uct.onrender.com
 
 A [Next.js frontend](frontend/) for this API lives in the `frontend/` folder of
